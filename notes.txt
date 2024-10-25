@@ -1,0 +1,6 @@
+-tried a custom code to split sprite sheet into animations. Would take >1 day <14 days to figure out.
+
+Animation Workflow
+Spritesheets Via Itchio
+Cut into rows using https://yeoji.github.io/spritesheet-cutter/
+Use the rows in https://www.aseprite.org/support/ (have steam key) to create animation and export
