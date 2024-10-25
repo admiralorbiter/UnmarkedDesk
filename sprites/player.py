@@ -1,6 +1,6 @@
 import pygame
 import os
-from settings import PLAYER_SPEED, BLUE
+from settings import PLAYER_SPEED
 from PIL import Image
 
 class Player(pygame.sprite.Sprite):
@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
         self.current_animation = 'idle_down'
         self.animation_index = 0
         self.animation_speed = 0.1
-        self.animation_timer = 0
+        self.last_update = pygame.time.get_ticks()
 
     def load_animations(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +35,7 @@ class Player(pygame.sprite.Sprite):
         with Image.open(gif_path) as img:
             for frame in range(img.n_frames):
                 img.seek(frame)
-                frame_surface = pygame.image.fromstring(img.tobytes(), img.size, img.mode)
+                frame_surface = pygame.image.fromstring(img.convert("RGBA").tobytes(), img.size, "RGBA")
                 frames.append(frame_surface)
         return frames
 
@@ -54,6 +54,12 @@ class Player(pygame.sprite.Sprite):
         self.rect.center += self.direction * self.speed
 
     def animate(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.animation_speed * 1000:  # Convert to milliseconds
+            self.last_update = now
+            self.animation_index = (self.animation_index + 1) % len(self.animations[self.current_animation])
+            self.image = self.animations[self.current_animation][self.animation_index]
+
         if self.direction.magnitude() == 0:
             if 'run' in self.current_animation:
                 self.current_animation = f'idle_{self.current_animation.split("_")[1]}'
@@ -66,9 +72,3 @@ class Player(pygame.sprite.Sprite):
                 self.current_animation = 'run_down'
             elif self.direction.y < 0:
                 self.current_animation = 'run_up'
-
-        self.animation_timer += pygame.time.get_ticks() / 1000
-        if self.animation_timer >= self.animation_speed:
-            self.animation_timer = 0
-            self.animation_index = (self.animation_index + 1) % len(self.animations[self.current_animation])
-            self.image = self.animations[self.current_animation][self.animation_index]
