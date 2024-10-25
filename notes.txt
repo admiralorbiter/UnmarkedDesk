@@ -4,3 +4,6 @@ Animation Workflow
 Spritesheets Via Itchio
 Cut into rows using https://yeoji.github.io/spritesheet-cutter/
 Use the rows in https://www.aseprite.org/support/ (have steam key) to create animation and export
+
+Asset Credit:
+https://limezu.itch.io/ - LimeZu
