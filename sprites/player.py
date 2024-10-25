@@ -1,6 +1,7 @@
 import pygame
 import os
 from settings import PLAYER_SPEED, BLUE
+from PIL import Image
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -13,20 +14,30 @@ class Player(pygame.sprite.Sprite):
         self.current_animation = 'idle_down'
         self.animation_index = 0
         self.animation_speed = 0.1
+        self.animation_timer = 0
 
     def load_animations(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
         images_dir = os.path.join(base_dir, 'images')
         self.animations = {
-            'idle_down': [pygame.image.load(os.path.join(images_dir, 'down-standing.gif'))],
-            'idle_up': [pygame.image.load(os.path.join(images_dir, 'up-standing.gif'))],
-            'idle_left': [pygame.image.load(os.path.join(images_dir, 'left-standing.gif'))],
-            'idle_right': [pygame.image.load(os.path.join(images_dir, 'right-standing.gif'))],
-            'run_down': [pygame.image.load(os.path.join(images_dir, 'down-running.gif'))],
-            'run_up': [pygame.image.load(os.path.join(images_dir, 'up-running.gif'))],
-            'run_left': [pygame.image.load(os.path.join(images_dir, 'left-running.gif'))],
-            'run_right': [pygame.image.load(os.path.join(images_dir, 'right-running.gif'))],
+            'idle_down': self.load_gif_frames(os.path.join(images_dir, 'down-standing.gif')),
+            'idle_up': self.load_gif_frames(os.path.join(images_dir, 'up-standing.gif')),
+            'idle_left': self.load_gif_frames(os.path.join(images_dir, 'left-standing.gif')),
+            'idle_right': self.load_gif_frames(os.path.join(images_dir, 'right-standing.gif')),
+            'run_down': self.load_gif_frames(os.path.join(images_dir, 'down-running.gif')),
+            'run_up': self.load_gif_frames(os.path.join(images_dir, 'up-running.gif')),
+            'run_left': self.load_gif_frames(os.path.join(images_dir, 'left-running.gif')),
+            'run_right': self.load_gif_frames(os.path.join(images_dir, 'right-running.gif')),
         }
+
+    def load_gif_frames(self, gif_path):
+        frames = []
+        with Image.open(gif_path) as img:
+            for frame in range(img.n_frames):
+                img.seek(frame)
+                frame_surface = pygame.image.fromstring(img.tobytes(), img.size, img.mode)
+                frames.append(frame_surface)
+        return frames
 
     def update(self):
         self.move()
@@ -55,9 +66,9 @@ class Player(pygame.sprite.Sprite):
                 self.current_animation = 'run_down'
             elif self.direction.y < 0:
                 self.current_animation = 'run_up'
-        self.animation_index += self.animation_speed
-        if self.animation_index >= len(self.animations[self.current_animation]):
-            self.animation_index = 0
 
-        self.image = self.animations[self.current_animation][int(self.animation_index)]
-
+        self.animation_timer += pygame.time.get_ticks() / 1000
+        if self.animation_timer >= self.animation_speed:
+            self.animation_timer = 0
+            self.animation_index = (self.animation_index + 1) % len(self.animations[self.current_animation])
+            self.image = self.animations[self.current_animation][self.animation_index]
